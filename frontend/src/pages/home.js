@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-
+const backend = process.env.REACT_APP_BACKEND;
 const Home = () => {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        axios.get('http://localhost:4000/aa')
+        axios.get(backend+'aa')
             .then(response => {
                 console.log(response)
                 setData(response.data);
