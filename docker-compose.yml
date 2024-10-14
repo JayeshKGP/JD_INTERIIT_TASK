@@ -1,15 +1,15 @@
 version: '3'
 services:
   # React app service
-  client:
-    build:
-      context: ./frontend
-    ports:
-      - "3000:3000"
-    depends_on:
-      - server
-    environment:
-      - REACT_APP_BACKEND=http://4.240.112.77:4000/
+  # client:
+  #   build:
+  #     context: ./frontend
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     - server
+  #   environment:
+  #     - REACT_APP_BACKEND=http://4.240.112.77:4000/
 
   # Node.js backend service
   server:
