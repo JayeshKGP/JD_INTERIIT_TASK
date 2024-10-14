@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-const backend = process.env.REACT_APP_BACKEND;
+const backend = 'http://4.240.112.77:4000/';
 const Home = () => {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
