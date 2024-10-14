@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-const backend = 'http://4.240.112.77:4000/';
+const backend = 'https://taskbackend.work.gd/';
 const Home = () => {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
