@@ -1,5 +1,5 @@
 # Use node image for building the React app
-FROM node:16-alpine as build
+FROM node:18 as build
 WORKDIR /app
 COPY package.json ./
 COPY package-lock.json ./
