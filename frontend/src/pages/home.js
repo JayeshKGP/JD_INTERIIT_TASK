@@ -7,6 +7,7 @@ const Home = () => {
     const [error, setError] = useState(null);
 
     useEffect(() => {
+        console.log(backend)
         axios.get(backend+'aa')
             .then(response => {
                 console.log(response)

@@ -9,7 +9,7 @@ services:
     depends_on:
       - server
     environment:
-      - REACT_APP_BACKEND='http://4.240.112.77:4000/'
+      - REACT_APP_BACKEND=http://4.240.112.77:4000/
 
   # Node.js backend service
   server:
