@@ -4,7 +4,6 @@ services:
   client:
     build:
       context: ./frontend
-    platform: linux/amd64
     ports:
       - "3000:3000"
     depends_on:
@@ -16,7 +15,6 @@ services:
   server:
     build:
       context: ./backend
-    platform: linux/amd64
     ports:
       - "4000:4000"
     depends_on:
