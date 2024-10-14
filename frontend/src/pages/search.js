@@ -1,128 +1,147 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import debounce from 'lodash.debounce';
-const backend = 'https://taskbackend.work.gd/';
-const SearchPage = () => {
-    const [searchTerm, setSearchTerm] = useState('');
-    const [items, setItems] = useState([]);
-    const [filters, setFilters] = useState({
-        type: '',
-        material: '',
-        brand: '',
-        category: '',
-        status: ''
-    });
+import React, { useState, useEffect } from 'react'
+import axios from 'axios'
+import {
+  TextField,
+  InputAdornment,
+  Grid,
+  Card,
+  CardContent,
+  CardMedia,
+  Typography,
+  Chip,
+  Box,
+  Container,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+} from '@mui/material'
+import { Search } from '@mui/icons-material'
 
-    useEffect(() => {
-        fetchItems();
-    }, []);
+const backend = 'https://taskbackend.work.gd/'; // Replace with your actual backend URL
 
-    const fetchItems = async (query = '') => {
-        try {
-            const response = await axios.get(backend+'items', {
-                params: {
-                    search: query,
-                    ...filters
-                }
-            });
-            setItems(response.data);
-        } catch (error) {
-            console.error('Error fetching items:', error);
+export default function CoolSearchFilter() {
+  const [searchTerm, setSearchTerm] = useState('')
+  const [filters, setFilters] = useState({
+    type: '',
+    material: '',
+    brand: '',
+    category: '',
+    status: '',
+  })
+  const [items, setItems] = useState([])
+
+  const fetchItems = async (query = '') => {
+    try {
+      const response = await axios.get(backend + 'items', {
+        params: {
+          search: query,
+          ...filters
         }
-    };
+      });
+      setItems(response.data);
+    } catch (error) {
+      console.error('Error fetching items:', error);
+    }
+  };
 
-    const debouncedFetchItems = debounce((query) => {
-        fetchItems(query);
-    }, 500);
+  useEffect(() => {
+    fetchItems(searchTerm)
+  }, [searchTerm, filters])
 
-    const handleSearchChange = (event) => {
-        const query = event.target.value;
-        setSearchTerm(query);
-        debouncedFetchItems(query);
-    };
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value)
+  }
 
-    const handleFilterChange = (event) => {
-        const { name, value } = event.target;
-        setFilters((prevFilters) => {
-            const newFilters = {
-                ...prevFilters,
-                [name]: value
-            };
-            fetchItems(searchTerm, newFilters);
-            return newFilters;
-        });
-    };
+  const handleFilterChange = (event) => {
+    const name = event.target.name
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      [name]: event.target.value,
+    }))
+  }
 
-    return (
-        <div>
-            <input
-                type="text"
-                placeholder="Search..."
-                value={searchTerm}
-                onChange={handleSearchChange}
-            />
-            <div>
-                <label>
-                    Type:
-                    <input
-                        type="text"
-                        name="type"
-                        value={filters.type}
-                        onChange={handleFilterChange}
-                    />
-                </label>
-                <label>
-                    Material:
-                    <input
-                        type="text"
-                        name="material"
-                        value={filters.material}
-                        onChange={handleFilterChange}
-                    />
-                </label>
-                <label>
-                    Brand:
-                    <input
-                        type="text"
-                        name="brand"
-                        value={filters.brand}
-                        onChange={handleFilterChange}
-                    />
-                </label>
-                <label>
-                    Category:
-                    <input
-                        type="text"
-                        name="category"
-                        value={filters.category}
-                        onChange={handleFilterChange}
-                    />
-                </label>
-                <label>
-                    Status:
-                    <input
-                        type="text"
-                        name="status"
-                        value={filters.status}
-                        onChange={handleFilterChange}
-                    />
-                </label>
-            </div>
-            <ul>
-                {items.map((item) => (
-                    <li key={item._id}>
-                        <img src={item.image_url} alt={item.name} width="100" />
-                        <h3>{item.name}</h3>
-                        <p>Brand: {item.brand}</p>
-                        <p>Category: {item.category}</p>
-                        <p>Price: ${item.price}</p>
-                        <p>Quantity: {item.quantity}</p>
-                        <p>Status: {item.status}</p>
-                    </li>
-                ))}
-            </ul>
-        </div>
-    );
-};
+  return (
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Box sx={{ mb: 4 }}>
+        <TextField
+          fullWidth
+          variant="outlined"
+          placeholder="Search..."
+          value={searchTerm}
+          onChange={handleSearchChange}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Search />
+              </InputAdornment>
+            ),
+          }}
+        />
+      </Box>
 
-export default SearchPage;
+      <Box sx={{ mb: 4, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+        {Object.entries(filters).map(([key, value]) => (
+          <FormControl key={key} variant="outlined" sx={{ minWidth: 120 }}>
+            <InputLabel id={`${key}-label`}>{key.charAt(0).toUpperCase() + key.slice(1)}</InputLabel>
+            <Select
+              labelId={`${key}-label`}
+              name={key}
+              value={value}
+              onChange={handleFilterChange}
+              label={key.charAt(0).toUpperCase() + key.slice(1)}
+            >
+              <MenuItem value="">
+                <em>None</em>
+              </MenuItem>
+              <MenuItem value="option1">Option 1</MenuItem>
+              <MenuItem value="option2">Option 2</MenuItem>
+              <MenuItem value="option3">Option 3</MenuItem>
+            </Select>
+          </FormControl>
+        ))}
+      </Box>
+
+      <Grid container spacing={3}>
+        {items.map((item) => (
+          <Grid item key={item._id} xs={12} sm={6} md={4}>
+            <Card>
+              <CardMedia
+                component="img"
+                height="200"
+                image={item.image_url}
+                alt={item.name}
+              />
+              <CardContent>
+                <Typography gutterBottom variant="h6" component="div">
+                  {item.name}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Brand: {item.brand}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Category: {item.category}
+                </Typography>
+                <Typography variant="h6" color="primary" sx={{ mt: 1 }}>
+                  ${item.price.toFixed(2)}
+                </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
+                  <Chip
+                    label={`Qty: ${item.quantity}`}
+                    color={item.quantity > 5 ? 'success' : 'warning'}
+                    size="small"
+                  />
+                  <Chip
+                    label={item.status}
+                    color={item.status === 'In Stock' ? 'success' : 'error'}
+                    size="small"
+                  />
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+    </Container>
+  )
+}
