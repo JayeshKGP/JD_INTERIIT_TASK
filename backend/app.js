@@ -86,7 +86,10 @@ app.get('/info', async (req, res) => {
 app.get('/aa', async(req, res) => {
     res.send('hehe')
 })
-
+app.get('/items', async(req, res) => {
+    const h = await items.find().toArray()
+    res.send(h)
+})
 app.get('/bb', async(req, res) => {
     const h = await godowns.findOne()
     res.send(h);
