@@ -27,7 +27,7 @@ import {
 
 
 
-const backend = 'https://taskbackend.work.gd/';
+const backend = 'https://jdtaskbackend.tech/';
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: '#fff',

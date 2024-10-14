@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import debounce from 'lodash.debounce';
-const backend = 'https://taskbackend.work.gd/';
+const backend = 'https://jdtaskbackend.tech/';
 const SearchPage = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [items, setItems] = useState([]);
