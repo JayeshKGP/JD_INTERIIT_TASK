@@ -12,16 +12,16 @@ services:
   #     - REACT_APP_BACKEND=http://4.240.112.77:4000/
 
   # Node.js backend service
-  server:
-    build:
-      context: ./backend
-    ports:
-      - "4000:4000"
-    depends_on:
-      - mongo
-    environment:
-      - URI=mongodb://root:password@4.240.112.77:27017/
-      - PORT=4000
+  # server:
+  #   build:
+  #     context: ./backend
+  #   ports:
+  #     - "4000:4000"
+  #   depends_on:
+  #     - mongo
+  #   environment:
+  #     - URI=mongodb://root:password@4.240.112.77:27017/
+  #     - PORT=4000
 
   # MongoDB service
   mongo:
