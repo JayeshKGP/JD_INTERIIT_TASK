@@ -152,6 +152,8 @@ app.post('/signin', async(req, res) => {
         }else{
             res.json({'auth': 'false', 'message': 'Invalid password'})
         }
+    }else{
+        res.json({'auth': 'false', 'message': 'User not found'})
     }
 })
 
