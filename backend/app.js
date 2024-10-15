@@ -96,12 +96,48 @@ app.get('/info', async (req, res) => {
     res.json({auth: true, data: g})
 })
 
-app.get('/aa', async(req, res) => {
-    res.send('hehe')
-})
-app.get('/items', async(req, res) => {
-    const h = await items.find().toArray()
-    res.send(h)
+app.get('/search', async(req, res) => {
+    const filters = req.headers;
+    const matchConditions = {};
+
+    if (filters.name) {
+        matchConditions.name = { $regex: filters.name, $options: 'i' };
+    }
+    if (filters.category) {
+        matchConditions.category = filters.category;
+    }
+    if (filters.status) {
+        matchConditions.status = filters.status;
+    }
+    if (filters.brand) {
+        matchConditions.brand = filters.brand;
+    }
+    if (filters.minprice || filters.maxprice) {
+        matchConditions.price = {};
+        if (filters.minprice) {
+            matchConditions.price.$gte = parseFloat(filters.minprice);
+        }
+        if (filters.maxprice) {
+            matchConditions.price.$lte = parseFloat(filters.maxprice);
+        }
+    }
+
+    const getfiltereditems = await items.aggregate([
+        { $match: matchConditions },
+        { $project: {
+            name: 1,
+            category: 1,
+            status: 1,
+            brand: 1,
+            price: 1,
+            item_id: 1,
+            quantity: 1,
+            godown_id: 1,
+            attributes: 1,
+            image_url: 1
+        }}
+    ]).toArray();
+    res.send(getfiltereditems)
 })
 app.get('/bb', async(req, res) => {
     const h = await godowns.findOne()
@@ -145,6 +181,13 @@ app.post('/signup', async(req, res) => {
                 httpOnly: true,
               }).json({'auth': 'true'});
     res.send({'auth': 'true'});
+})
+
+
+app.get('/signout', async(req, res) => {
+    res.clearCookie('token',
+        {httpOnly: true}
+    ).json({'auth': 'false'});
 })
 
 http.listen(PORT, () => {

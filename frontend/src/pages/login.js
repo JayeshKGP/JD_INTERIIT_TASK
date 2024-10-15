@@ -1,129 +1,173 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import axios from 'axios'
+import { 
+  Button, 
+  TextField, 
+  Typography, 
+  Container, 
+  Box, 
+  CssBaseline,
+  createTheme,
+  ThemeProvider
+} from '@mui/material'
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#000000',
+    },
+    background: {
+      default: '#ffffff',
+    },
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: 0,
+          boxShadow: 'none',
+          '&:hover': {
+            boxShadow: 'none',
+          },
+        },
+      },
+    },
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          '& .MuiOutlinedInput-root': {
+            '& fieldset': {
+              borderRadius: 0,
+            },
+          },
+        },
+      },
+    },
+  },
+});
 
 export default function AuthForm() {
+  const [isRedirect, setIsRedirect] = useState(false)
   const [isSignUp, setIsSignUp] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
-  const backend = process.env.REACT_APP_BACKEND;
+  const backend = process.env.REACT_APP_BACKEND
+
+  useEffect(() => {
+    const auth = localStorage.getItem('auth')
+    if (auth === 'true') {
+      setIsRedirect(true)
+      setTimeout(() => {
+        window.location.href = '/' // Redirect after 2 seconds
+      }, 2000)
+    }
+  }, [])
 
   const handleSubmit = (e) => {
     e.preventDefault()
     const url = isSignUp ? 'signup' : 'signin'
 
-    axios.post(backend+url, { email, password }, { withCredentials: true })
-        .then(response => {
-            console.log('Success:', response.data)
-            if(response.data.auth === 'true'){
-                window.location.href = '/';
-            }else{
-                alert(response.data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error)
-            // Handle error (e.g., show error message)
-        })
+    axios.post(backend + url, { email, password }, { withCredentials: true })
+      .then(response => {
+        console.log('Success:', response.data)
+        if (response.data.auth === 'true') {
+          window.location.href = '/'
+          localStorage.setItem('auth', 'true')
+        } else {
+          localStorage.setItem('auth', 'false')
+          alert(response.data.message)
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error)
+        // Handle error (e.g., show error message)
+      })
     console.log(isSignUp ? 'Sign Up' : 'Sign In', { email, password })
   }
 
-  const formStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: '100vh',
-    padding: '20px',
-    backgroundColor: '#f3e8ff',
-    fontFamily: 'Arial, sans-serif',
-  }
-
-  const cardStyle = {
-    backgroundColor: 'white',
-    borderRadius: '8px',
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-    padding: '20px',
-    width: '100%',
-    maxWidth: '400px',
-  }
-
-  const inputStyle = {
-    width: '100%',
-    padding: '10px',
-    margin: '10px 0',
-    borderRadius: '4px',
-    border: '1px solid #ccc',
-  }
-
-  const buttonStyle = {
-    width: '100%',
-    padding: '10px',
-    margin: '10px 0',
-    backgroundColor: '#8b5cf6',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-  }
-
-  const linkButtonStyle = {
-    background: 'none',
-    border: 'none',
-    color: '#8b5cf6',
-    cursor: 'pointer',
-    textDecoration: 'underline',
+  if (isRedirect) {
+    return (
+      <Container component="main" maxWidth="xs">
+        <Box
+          sx={{
+            marginTop: 8,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
+          <Typography component="h1" variant="h5">
+            Already Login Redirecting...
+          </Typography>
+        </Box>
+      </Container>
+    )
   }
 
   return (
-    <div style={formStyle}>
-      <div style={cardStyle}>
-        <h2 style={{ textAlign: 'center', color: '#4b5563' }}>
-          {isSignUp ? 'Create an Account' : 'Welcome Back'}
-        </h2>
-        <p style={{ textAlign: 'center', color: '#6b7280', marginBottom: '20px' }}>
-          {isSignUp ? 'Sign up to get started' : 'Sign in to your account'}
-        </p>
-        <form onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="email" style={{ display: 'block', marginBottom: '5px' }}>Email</label>
-            <input
+    <ThemeProvider theme={theme}>
+      <Container component="main" maxWidth="xs">
+        <CssBaseline />
+        <Box
+          sx={{
+            marginTop: 8,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
+          <Typography component="h1" variant="h4" sx={{ mb: 3, fontWeight: 'bold' }}>
+            {isSignUp ? 'Create Account' : 'Sign In'}
+          </Typography>
+          <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1, width: '100%' }}>
+            <TextField
+              margin="normal"
+              required
+              fullWidth
               id="email"
-              type="email"
-              placeholder="m@example.com"
+              label="Email Address"
+              name="email"
+              autoComplete="email"
+              autoFocus
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              required
-              style={inputStyle}
+              variant="outlined"
             />
-          </div>
-          <div>
-            <label htmlFor="password" style={{ display: 'block', marginBottom: '5px' }}>Password</label>
-            <input
-              id="password"
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="password"
+              label="Password"
               type="password"
+              id="password"
+              autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
-              style={inputStyle}
+              variant="outlined"
             />
-          </div>
-          <button type="submit" style={buttonStyle}>
-            {isSignUp ? 'Sign Up' : 'Sign In'}
-          </button>
-        </form>
-        <div style={{ textAlign: 'center', margin: '20px 0' }}>
-          <span style={{ color: '#6b7280' }}>Or continue with</span>
-        </div>
-        <button
-          style={linkButtonStyle}
-          onClick={() => setIsSignUp(!isSignUp)}
-        >
-          {isSignUp
-            ? "Already have an account? Sign In"
-            : "Don't have an account? Sign Up"}
-        </button>
-      </div>
-    </div>
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{ mt: 3, mb: 2, py: 1.5, fontSize: '1rem', backgroundColor: 'black', color: 'white', '&:hover': { backgroundColor: '#333' } }}
+            >
+              {isSignUp ? 'Sign Up' : 'Sign In'}
+            </Button>
+            <Box sx={{ mt: 2, textAlign: 'center' }}>
+              <Button
+                onClick={() => setIsSignUp(!isSignUp)}
+                sx={{ textTransform: 'none', fontSize: '0.9rem', color: 'black' }}
+              >
+                {isSignUp
+                  ? "Already have an account? Sign In"
+                  : "Don't have an account? Sign Up"}
+              </Button>
+            </Box>
+          </Box>
+        </Box>
+      </Container>
+    </ThemeProvider>
   )
 }

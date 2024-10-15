@@ -1,210 +1,206 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { styled } from '@mui/material/styles';
-import Paper from '@mui/material/Paper';
-import Grid from '@mui/material/Grid2';
+import { styled, ThemeProvider, createTheme } from '@mui/material/styles';
+import {
+  Box,
+  Container,
+  Grid,
+  Paper,
+  Typography,
+  Card,
+  CardMedia,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Alert,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableRow,
+} from '@mui/material';
 import { RichTreeView } from '@mui/x-tree-view/RichTreeView';
-import { Badge, Container } from '@mui/material';
-import { 
-    Card, 
-    CardMedia, 
-    CardContent, 
-    CardActions, 
-    Typography, 
-    Button,
-    Chip,
-    Box
-  } from '@mui/material';
-  import { 
-    Couch, 
-    Palette, 
-    Straighten, 
-    Inventory,
-    LocalShipping,
-    BarChart,
-    Chair
-  } from '@mui/icons-material';
-
+import {
+  Inventory,
+  Category,
+  AttachMoney,
+  Store,
+  Build,
+  Description,
+  Label,
+} from '@mui/icons-material';
 
 const backend = process.env.REACT_APP_BACKEND;
 
-const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: '#fff',
-  ...theme.typography.body2,
-  padding: theme.spacing(1),
-  textAlign: 'center',
-  color: theme.palette.text.secondary,
-  ...theme.applyStyles('dark', {
-    backgroundColor: '#1A2027',
-  }),
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#000000',
+    },
+    background: {
+      default: '#ffffff',
+    },
+  },
+  components: {
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          boxShadow: 'none',
+          border: '1px solid #e0e0e0',
+        },
+      },
+    },
+  },
+});
+
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(2),
+  height: '100%',
+  display: 'flex',
+  flexDirection: 'column',
 }));
+
 const Home = () => {
-    const [data, setData] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [selected, setSelected] = useState(false);
-    const [ItemData, setItemData] = useState({});
-    const [MY_LIST, setMY_LIST] = useState([{id: 'loading',
-        name: 'Loading...',}]);
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selected, setSelected] = useState(false);
+  const [itemData, setItemData] = useState({});
+  const [myList, setMyList] = useState([{ id: 'loading', name: 'Loading...' }]);
 
-    useEffect(() => {
-        console.log(backend)
-        axios.get(backend+'task')
-            .then(response => {
-                console.log(response)
-                setData(response.data);
-                setMY_LIST(response.data);
-                setLoading(false);
-            })
-            .catch(error => {
-                console.error('There was an error!', error);
-                setError(error);
-                setLoading(false);
-            });
-    }, []);
+  useEffect(() => {
+    axios.get(backend + 'task')
+      .then(response => {
+        setData(response.data);
+        setMyList(response.data);
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error('There was an error!', error);
+        setError(error);
+        setLoading(false);
+      });
+  }, []);
 
-    function getItemInfo(item_id){
-        axios.get(backend+'info', { headers: { id: item_id }, withCredentials: true,}, )
-            .then(response => {
-              if(response.data.auth){
-                setItemData(response.data.data);
-                setSelected(true);
-                console.log(response.data.data);
-              }else{
-                alert('Please login first');
-                window.location.href = '/login';
-              }
-                 
-            })
-            .catch(error => {
-                alert(error);
-            });
-    }
-    if (loading) return <p>Loading...</p>;
-    if (error) return <p>Error: {error.message}</p>;
+  function getItemInfo(item_id) {
+    axios.get(backend + 'info', { headers: { id: item_id }, withCredentials: true })
+      .then(response => {
+        if (response.data.auth) {
+          setItemData(response.data.data);
+          setSelected(true);
+        } else {
+          localStorage.setItem('auth', 'false');
+          alert('Please login first');
+          window.location.href = '/login';
+        }
+      })
+      .catch(error => {
+        alert(error);
+      });
+  }
 
-    function getItemLabel(item) {
-        return item.name;
-      }
+  function getItemLabel(item) {
+    return item.name;
+  }
 
-    return (
-        <Box sx={{ flexGrow: 1 }}>
-      <Grid container spacing={2}>
+  if (loading) return <CircularProgress color='black'/>;
+  if (error) return <Alert severity="error">Error: {error.message}</Alert>;
 
-        <Grid size={{ xs: 12, md: 12 }}>
-            <Item>
-                <h1 style={{ color: '#1E90FF' }}>Tree View App</h1>
-            </Item>
-        </Grid>
-
-        <Grid size={{ xs: 4, md: 4 }}>
-          <Item><RichTreeView items={MY_LIST} getItemLabel={getItemLabel} onItemClick={(event, item_id)=>{
-            if(item_id.startsWith('item_')){
-                setSelected(false);
-                getItemInfo(item_id);
-          }}}/></Item>
-        </Grid>
-        <Grid size={{ xs: 8, md: 8 }}>
-          <Item>{selected ? <Container>
-            
-            <Card sx={{ maxWidth: 1000, margin: 'auto' }}>
-      <Grid container>
-        <Grid item xs={12} md={6}>
-          <Box sx={{ position: 'relative' }}>
-            <CardMedia
-              component="img"
-              height="100%"
-              image={ItemData.image_url}
-              alt={ItemData.name}
-              sx={{ objectFit: 'cover', height: { xs: '300px', md: '100%' } }}
-            />
-            <Chip
-              label={ItemData.status.replace('_', ' ')}
-              color="error"
-              sx={{
-                position: 'absolute',
-                top: 16,
-                left: 16,
-                textTransform: 'capitalize'
-              }}
-            />
-          </Box>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <CardContent>
-            <Typography gutterBottom variant="h4" component="div">
-              {ItemData.name}
-            </Typography>
-            <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-              {ItemData.brand} - {ItemData.category}
-            </Typography>
-            <Grid container spacing={2} sx={{ my: 2 }}>
-              <Grid item xs={6}>
-                <Box display="flex" alignItems="center">
-                  <Inventory sx={{ mr: 1 }} />
-                  <Typography variant="body2">{ItemData.material}</Typography>
-                </Box>
-              </Grid>
-              <Grid item xs={6}>
-                <Box display="flex" alignItems="center">
-                  <Straighten sx={{ mr: 1 }} />
-                  <Typography variant="body2">{ItemData.dimensions}</Typography>
-                </Box>
-              </Grid>
-              <Grid item xs={6}>
-                <Box display="flex" alignItems="center">
-                  <Palette sx={{ mr: 1 }} />
-                  <Typography variant="body2">{ItemData.color}</Typography>
-                </Box>
-              </Grid>
-              <Grid item xs={6}>
-                <Box display="flex" alignItems="center">
-                  <Chair sx={{ mr: 1 }} />
-                  <Typography variant="body2">Qty: {ItemData.quantity}</Typography>
-                </Box>
-              </Grid>
-              <Grid item xs={6}>
-                <Box display="flex" alignItems="center">
-                  <LocalShipping sx={{ mr: 1 }} />
-                  <Typography variant="body2">Godown ID: {ItemData.godown_id.slice(0, 8)}...</Typography>
-                </Box>
-              </Grid>
-              <Grid item xs={6}>
-                <Box display="flex" alignItems="center">
-                  <BarChart sx={{ mr: 1 }} />
-                  <Typography variant="body2">Item ID: {ItemData.item_id.slice(0, 8)}...</Typography>
-                </Box>
-              </Grid>
-            </Grid>
-            <Box display="flex" justifyContent="space-between" alignItems="center" mt={2}>
-              <Typography variant="h5" color="primary">
-                ${ItemData.price.toFixed(2)}
+  return (
+    <ThemeProvider theme={theme}>
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold', textAlign: 'center' }}>
+          Inventory Management
+        </Typography>
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={4}>
+            <StyledPaper>
+              <Typography variant="h6" gutterBottom>
+                Item List
               </Typography>
-              <Chip 
-                label={ItemData.status === 'out_of_stock' ? 'Out of Stock' : 'In Stock'} 
-                color={ItemData.status === 'out_of_stock' ? 'error' : 'success'} 
-                variant="outlined"
+              <RichTreeView
+                items={myList}
+                getItemLabel={getItemLabel}
+                onItemClick={(event, item_id) => {
+                  if (item_id.startsWith('item_')) {
+                    setSelected(false);
+                    getItemInfo(item_id);
+                  }
+                }}
               />
-            </Box>
-          </CardContent>
-          <CardActions sx={{ justifyContent: 'space-between', p: 2, bgcolor: 'action.hover' }}>
-            <Button variant="outlined" size="large" fullWidth sx={{ mr: 1 }}>
-              Add to Cart
-            </Button>
-            <Button variant="contained" size="large" fullWidth sx={{ ml: 1 }}>
-              Buy Now
-            </Button>
-          </CardActions>
-        </Grid>
-      </Grid>
-    </Card>
-            
-          </Container> : <h2>Select item from list</h2>}</Item>
-        </Grid>
+            </StyledPaper>
+          </Grid>
+          <Grid item xs={12} md={8}>
+            <StyledPaper>
+              {selected ? (
+                <Card>
+                  <Grid container>
+                    <Grid item xs={12} md={6}>
+                      <CardMedia
+                        component="img"
+                        height="100%"
+                        image={itemData.image_url}
+                        alt={itemData.name}
+                        sx={{ objectFit: 'cover', height: { xs: '300px', md: '100%' } }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <CardContent>
+                        <Typography gutterBottom variant="h5" component="div" sx={{ fontWeight: 'bold' }}>
+                          {itemData.name}
+                        </Typography>
+                        <Typography variant="subtitle1" color="text.secondary" gutterBottom>
+                          {itemData.brand} - {itemData.category}
+                        </Typography>
+                        <TableContainer>
+                          <Table size="small">
+                            <TableBody>
+                              <TableRow>
+                                <TableCell><Box display="flex" alignItems="center"><Inventory sx={{ mr: 1 }} /> Quantity</Box></TableCell>
+                                <TableCell>{itemData.quantity}</TableCell>
+                              </TableRow>
+                              <TableRow>
+                                <TableCell><Box display="flex" alignItems="center"><AttachMoney sx={{ mr: 1 }} /> Price</Box></TableCell>
+                                <TableCell>${itemData.price.toFixed(2)}</TableCell>
+                              </TableRow>
+                              <TableRow>
+                                <TableCell><Box display="flex" alignItems="center"><Store sx={{ mr: 1 }} /> Godown ID</Box></TableCell>
+                                <TableCell>{itemData.godown_id}</TableCell>
+                              </TableRow>
 
-      </Grid>
-    </Box>
-    );
+
+                              {Object.entries(itemData.attributes).map(([key, value]) => (
+
+
+<TableRow>
+                                <TableCell><Box display="flex" alignItems="center"><Label sx={{ mr: 1 }} /> {key.charAt(0).toUpperCase() + key.slice(1)}</Box></TableCell>
+                                <TableCell>{value.toString()}</TableCell>
+                              </TableRow>
+                      ))}
+                            </TableBody>
+                          </Table>
+                        </TableContainer>
+                        <Box display="flex" justifyContent="space-between" alignItems="center" mt={2}>
+                          <Typography variant="body2">Item ID: {itemData.item_id}</Typography>
+                          <Chip
+                            label={itemData.status.replace('_', ' ')}
+                            color={itemData.status === 'out_of_stock' ? 'error' : 'success'}
+                            variant="outlined"
+                          />
+                        </Box>
+                      </CardContent>
+                    </Grid>
+                  </Grid>
+                </Card>
+              ) : (
+                <Typography variant="h6">Select an item from the list</Typography>
+              )}
+            </StyledPaper>
+          </Grid>
+        </Grid>
+      </Container>
+    </ThemeProvider>
+  );
 };
 
 export default Home;
