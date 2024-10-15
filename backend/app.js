@@ -182,7 +182,10 @@ app.post('/signup', async(req, res) => {
 
 app.get('/signout', async(req, res) => {
     res.clearCookie('token',
-        {httpOnly: true}
+        {httpOnly: true, 
+            secure: true, 
+            sameSite: 'None', 
+            path: '/' }
     ).json({'auth': 'false'});
 })
 
