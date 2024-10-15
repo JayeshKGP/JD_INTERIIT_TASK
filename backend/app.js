@@ -24,8 +24,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 const http = require("http").createServer(app);
 
-app.get('/task', async (req, res) => {
-    console.log('started')
+app.get('/gettree', async (req, res) => {
     var t = await godowns.find({parent_godown: null}).toArray()
     for(var i=0; i<t.length; i++){
         var hj = await godowns.find({parent_godown: t[i]['id']}).toArray()
@@ -88,10 +87,6 @@ app.get('/info', async (req, res) => {
     });
     var yy = req.headers.id;
     var hh = yy.substring(5)
-    console.log('....')
-    console.log(yy)
-    console.log(hh)
-    console.log('.....')
     var g = await items.findOne({item_id: hh});
     res.json({auth: true, data: g})
 })
@@ -99,7 +94,6 @@ app.get('/info', async (req, res) => {
 app.get('/search', async(req, res) => {
     const filters = req.headers;
     const matchConditions = {};
-
     if (filters.name) {
         matchConditions.name = { $regex: filters.name, $options: 'i' };
     }
@@ -138,10 +132,6 @@ app.get('/search', async(req, res) => {
         }}
     ]).toArray();
     res.send(getfiltereditems)
-})
-app.get('/bb', async(req, res) => {
-    const h = await godowns.findOne()
-    res.send(h);
 })
 
 app.post('/signin', async(req, res) => {

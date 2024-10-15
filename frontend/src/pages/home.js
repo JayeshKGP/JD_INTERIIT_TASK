@@ -69,7 +69,7 @@ const Home = () => {
   const [myList, setMyList] = useState([{ id: 'loading', name: 'Loading...' }]);
 
   useEffect(() => {
-    axios.get(backend + 'task')
+    axios.get(backend + 'gettree')
       .then(response => {
         setData(response.data);
         setMyList(response.data);
