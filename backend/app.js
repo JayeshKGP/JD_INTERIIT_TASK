@@ -2,6 +2,9 @@ const { MongoClient } = require("mongodb");
 const dotenv = require('dotenv');
 const express = require("express");
 var cors = require('cors');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
 dotenv.config();
 const app = express();
 const uri = process.env.URI;
@@ -11,9 +14,13 @@ client.connect();
 const database = client.db('Godowns_Items');
 const godowns = database.collection('Godowns');
 const items = database.collection('Items');
-app.use(cors());
+
+const authdb = client.db('Auth');
+const authdata = authdb.collection('Auth_Data');
+app.use(cors({credentials: true, origin: ['http://localhost:3000', 'http://jdtaskbackend.tech']}));
+app.use(cookieParser());
 const PORT = process.env.PORT;
-app.use(express.json())
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 const http = require("http").createServer(app);
 
@@ -73,6 +80,12 @@ app.get('/task', async (req, res) => {
     res.send(t)
 })
 app.get('/info', async (req, res) => {
+    var token = req.cookies.token;
+    if (!token) return res.json({ auth: false, message: 'No token provided.' });
+    jwt.verify(token, 'SECRET_KEY', function(err, decoded) {
+        if (err) return res.json({ auth: false, message: 'Failed to authenticate token.' });
+        req.email = decoded.email;
+    });
     var yy = req.headers.id;
     var hh = yy.substring(5)
     console.log('....')
@@ -80,7 +93,7 @@ app.get('/info', async (req, res) => {
     console.log(hh)
     console.log('.....')
     var g = await items.findOne({item_id: hh});
-    res.send(g)
+    res.json({auth: true, data: g})
 })
 
 app.get('/aa', async(req, res) => {
@@ -93,6 +106,45 @@ app.get('/items', async(req, res) => {
 app.get('/bb', async(req, res) => {
     const h = await godowns.findOne()
     res.send(h);
+})
+
+app.post('/signin', async(req, res) => {
+    const email = req.body.email;
+    const password = req.body.password;
+    const hashed = bcrypt.hashSync(password, 10);
+    const find = await authdata.findOne({
+        email: email
+    });
+    if(find){
+        if(bcrypt.compareSync(password, find.password)){
+            const token = jwt.sign({ email }, 'SECRET_KEY', { expiresIn: '1h' });
+            res.cookie('token', token, {
+                httpOnly: true,
+              }).json({'auth': 'true'});
+        }else{
+            res.json({'auth': 'false', 'message': 'Invalid password'})
+        }
+    }
+})
+
+app.post('/signup', async(req, res) => {
+    const email = req.body.email;
+    const password = req.body.password;
+    const hashed = bcrypt.hashSync(password, 10);
+    const data = {
+        email: email,
+        password: hashed
+    }
+    const find = await authdata.findOne({email: email});
+    if(find){
+        res.send({'auth': 'false', 'message': 'Already exists'})
+    }
+    const add = await authdata.insertOne(data);
+    const token = jwt.sign({ email }, 'SECRET_KEY', { expiresIn: '1h' });
+            res.cookie('token', token, {
+                httpOnly: true,
+              }).json({'auth': 'true'});
+    res.send({'auth': 'true'});
 })
 
 http.listen(PORT, () => {

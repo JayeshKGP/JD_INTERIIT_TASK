@@ -26,8 +26,7 @@ import {
   } from '@mui/icons-material';
 
 
-
-const backend = 'https://jdtaskbackend.tech/';
+const backend = process.env.REACT_APP_BACKEND;
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: '#fff',
@@ -65,11 +64,17 @@ const Home = () => {
     }, []);
 
     function getItemInfo(item_id){
-        axios.get(backend+'info', { headers: { id: item_id } })
+        axios.get(backend+'info', { headers: { id: item_id }, withCredentials: true,}, )
             .then(response => {
-                setItemData(response.data);
+              if(response.data.auth){
+                setItemData(response.data.data);
                 setSelected(true);
-                console.log(response.data); 
+                console.log(response.data.data);
+              }else{
+                alert('Please login first');
+                window.location.href = '/login';
+              }
+                 
             })
             .catch(error => {
                 alert(error);
