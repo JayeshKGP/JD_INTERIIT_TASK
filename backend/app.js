@@ -146,6 +146,8 @@ app.post('/signin', async(req, res) => {
             const token = jwt.sign({ email }, 'SECRET_KEY', { expiresIn: '1h' });
             res.cookie('token', token, {
                 httpOnly: true,
+                secure: true, // Set to true if using HTTPS
+                sameSite: 'None'
               }).json({'auth': 'true'});
         }else{
             res.json({'auth': 'false', 'message': 'Invalid password'})
@@ -169,6 +171,8 @@ app.post('/signup', async(req, res) => {
     const token = jwt.sign({ email }, 'SECRET_KEY', { expiresIn: '1h' });
             res.cookie('token', token, {
                 httpOnly: true,
+                secure: true, // Set to true if using HTTPS
+                sameSite: 'None'
               }).json({'auth': 'true'});
     res.send({'auth': 'true'});
 })
