@@ -17,7 +17,7 @@ const items = database.collection('Items');
 
 const authdb = client.db('Auth');
 const authdata = authdb.collection('Auth_Data');
-app.use(cors({credentials: true, origin: ['http://localhost:3000', 'http://jdtaskbackend.tech']}));
+app.use(cors({credentials: true, origin: ['http://localhost:3000', 'https://interiittask.tech']}));
 app.use(cookieParser());
 const PORT = process.env.PORT;
 app.use(express.json());
