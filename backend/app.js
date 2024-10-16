@@ -153,7 +153,7 @@ app.post('/signin', async(req, res) => {
             res.cookie('token', token, {
                 httpOnly: true,
                 secure: true, 
-                domain: isprod ? 'interiittask.tech' : 'localhost',
+                sameSite: 'None',
                 path: '/'
               }).json({'auth': 'true'});
         }else{
@@ -181,7 +181,7 @@ app.post('/signup', async(req, res) => {
             res.cookie('token', token, {
                 httpOnly: true,
                 secure: true,
-                domain: isprod ? 'interiittask.tech' : 'localhost',
+                sameSite: 'None',
                 path: '/'
               }).json({'auth': 'true'});
     res.send({'auth': 'true'});
@@ -192,7 +192,7 @@ app.get('/signout', async(req, res) => {
     res.clearCookie('token',
         {httpOnly: true, 
             secure: true, 
-            domain: isprod ? 'interiittask.tech' : 'localhost',
+            sameSite: 'None', 
             path: '/' }
     ).json({'auth': 'false'});
 })
