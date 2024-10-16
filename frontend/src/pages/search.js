@@ -134,8 +134,15 @@ const InventorySearch = () => {
           minPrice: priceRange[0],
           maxPrice: priceRange[1],
         },
+        withCredentials: true,
       });
-      setItems(response.data);
+      if(response.data.auth === false) {
+        localStorage.setItem('auth', 'false');
+          window.location.href = '/login';
+      }else{
+        setItems(response.data.data);
+      }
+      
     } catch (error) {
       console.error('Error fetching data:', error);
     }

@@ -8,9 +8,9 @@ const cookieParser = require('cookie-parser');
 dotenv.config();
 const app = express();
 const uri = process.env.URI;
+const isprod = process.env.ISPROD;
 const client = new MongoClient(uri);
 client.connect();
-
 const database = client.db('Godowns_Items');
 const godowns = database.collection('Godowns');
 const items = database.collection('Items');
@@ -92,6 +92,12 @@ app.get('/info', async (req, res) => {
 })
 
 app.get('/search', async(req, res) => {
+    var token = req.cookies.token;
+    if (!token) return res.json({ auth: false, message: 'No token provided.' });
+    jwt.verify(token, 'SECRET_KEY', function(err, decoded) {
+        if (err) return res.json({ auth: false, message: 'Failed to authenticate token.' });
+        req.email = decoded.email;
+    });
     const filters = req.headers;
     const matchConditions = {};
     if (filters.name) {
@@ -131,7 +137,7 @@ app.get('/search', async(req, res) => {
             image_url: 1
         }}
     ]).toArray();
-    res.send(getfiltereditems)
+    res.json({auth: true, data: getfiltereditems});
 })
 
 app.post('/signin', async(req, res) => {
@@ -146,8 +152,9 @@ app.post('/signin', async(req, res) => {
             const token = jwt.sign({ email }, 'SECRET_KEY', { expiresIn: '1h' });
             res.cookie('token', token, {
                 httpOnly: true,
-                secure: true, // Set to true if using HTTPS
-                sameSite: 'None'
+                secure: true, 
+                domain: isprod ? 'interiittask.tech' : 'localhost',
+                path: '/'
               }).json({'auth': 'true'});
         }else{
             res.json({'auth': 'false', 'message': 'Invalid password'})
@@ -173,8 +180,9 @@ app.post('/signup', async(req, res) => {
     const token = jwt.sign({ email }, 'SECRET_KEY', { expiresIn: '1h' });
             res.cookie('token', token, {
                 httpOnly: true,
-                secure: true, // Set to true if using HTTPS
-                sameSite: 'None'
+                secure: true,
+                domain: isprod ? 'interiittask.tech' : 'localhost',
+                path: '/'
               }).json({'auth': 'true'});
     res.send({'auth': 'true'});
 })
@@ -184,7 +192,7 @@ app.get('/signout', async(req, res) => {
     res.clearCookie('token',
         {httpOnly: true, 
             secure: true, 
-            sameSite: 'None', 
+            domain: isprod ? 'interiittask.tech' : 'localhost',
             path: '/' }
     ).json({'auth': 'false'});
 })
