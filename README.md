@@ -16,7 +16,7 @@ This is a Godown Inventory Management system built using React.js for the fronte
 - **Database**: MongoDB
 - **Authentication**: JWT tokens
 
-## Getting Started
+## Getting Started n
 
 ### Prerequisites
 
